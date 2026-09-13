@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบประเมินตรีธาตุประจำตัว (ปกติลักษณะ)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600;700&display=swap');
+
+  :root {
+    --teal-dark:  #0d6e6e;
+    --teal:       #14918a;
+    --teal-mid:   #1aada5;
+    --teal-light: #e6f7f6;
+    --teal-pale:  #f0fafa;
+    --vata:       #7b68ee;
+    --vata-pale:  #f0eeff;
+    --pitta:      #e05c3a;
+    --pitta-pale: #fff0ec;
+    --kapha:      #2a9d5c;
+    --kapha-pale: #edfaf2;
+    --text-main:  #1a2e2e;
+    --text-muted: #5a7272;
+    --border:     #c8e6e4;
+    --bg:         #f6fcfc;
+    --white:      #ffffff;
+    --shadow:     0 2px 12px rgba(13,110,110,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-mid) 100%);
+    color: var(--white);
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .header-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 0.25rem 0.9rem;
+    margin-bottom: 0.75rem;
+    color: rgba(255,255,255,0.9);
+  }
+  header h1 {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.4rem;
+  }
+  header p {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .progress-bar-bg {
+    height: 6px;
+    background: var(--teal-light);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal) 0%, var(--teal-mid) 100%);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--teal-light);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-icon svg { width: 18px; height: 18px; fill: white; }
+  .section-title {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+  }
+
+  /* ── Question card ── */
+  .question-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .question-card.answered { border-color: var(--teal-mid); }
+
+  .q-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.9rem;
+  }
+  .q-num {
+    width: 26px; height: 26px;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .question-card.answered .q-num {
+    background: var(--teal);
+    color: white;
+  }
+  .q-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-main);
+  }
+
+  /* ── Options ── */
+  .options { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    position: relative;
+  }
+  .option-label:hover { border-color: var(--teal-mid); background: var(--teal-pale); }
+  .option-label input[type="radio"] { display: none; }
+  .option-label.selected {
+    border-color: var(--teal);
+    background: var(--teal-light);
+  }
+
+  .option-indicator {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .option-label.selected .option-indicator {
+    border-color: var(--teal);
+    background: var(--teal);
+  }
+  .option-indicator::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .option-label.selected .option-indicator::after { opacity: 1; }
+
+  .option-key {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 14px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .option-label.selected .option-key { color: var(--teal-dark); }
+  .option-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-main);
+  }
+
+  /* ── Submit ── */
+  .submit-wrap {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-mid));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem 2.5rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(20,145,138,0.3);
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .submit-hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.6rem; }
+
+  /* ── Results ── */
+  #results { display: none; }
+  .result-card {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(13,110,110,0.12);
+    margin-bottom: 1.5rem;
+  }
+  .result-header {
+    background: linear-gradient(135deg, var(--teal-dark), var(--teal-mid));
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .result-header h2 {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .result-header p { font-size: 0.9rem; opacity: 0.85; }
+
+  .result-body { padding: 1.5rem; }
+
+  /* Dosha bars */
+  .dosha-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .dosha-name {
+    width: 80px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .dosha-bar-bg {
+    flex: 1;
+    height: 12px;
+    background: #eef3f3;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .dosha-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(.4,0,.2,1);
+  }
+  .dosha-bar-fill.vata  { background: linear-gradient(90deg, #7b68ee, #9d8ff5); }
+  .dosha-bar-fill.pitta { background: linear-gradient(90deg, #e05c3a, #f07a5a); }
+  .dosha-bar-fill.kapha { background: linear-gradient(90deg, #2a9d5c, #3cc470); }
+
+  .dosha-score {
+    width: 52px;
+    text-align: right;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Dominant badge */
+  .dominant-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 24px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 1rem 0 0.5rem;
+  }
+  .dominant-badge.vata  { background: var(--vata-pale); color: #5a4ecc; border: 1.5px solid #c0b8f5; }
+  .dominant-badge.pitta { background: var(--pitta-pale); color: #b03a20; border: 1.5px solid #f5c4b8; }
+  .dominant-badge.kapha { background: var(--kapha-pale); color: #1b6b3a; border: 1.5px solid #a8e6c0; }
+
+  .dosha-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    background: var(--teal-pale);
+    border-radius: 8px;
+    border-left: 3px solid var(--teal);
+  }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+  .btn-action {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-action:hover { opacity: 0.85; }
+  .btn-secondary {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    border: 1.5px solid var(--border);
+  }
+  .btn-primary {
+    background: var(--teal);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(20,145,138,0.25);
+  }
+
+  /* Answers detail table */
+  .answers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+  .answers-table th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .answers-table td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #eef3f3;
+    color: var(--text-main);
+    vertical-align: top;
+  }
+  .answers-table tr:last-child td { border-bottom: none; }
+  .tag-vata  { background: var(--vata-pale); color: #5a4ecc; border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; font-weight: 700; }
+  .tag-pitta { background: var(--pitta-pale); color: #b03a20; border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; font-weight: 700; }
+  .tag-kapha { background: var(--kapha-pale); color: #1b6b3a; border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; font-weight: 700; }
+  .tag-none  { background: #f0f0f0; color: #888; border-radius: 4px; padding: 1px 6px; font-size: 0.75rem; }
+
+  .section-detail-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+    margin: 1rem 0 0.5rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--teal-dark);
+    color: white;
+    padding: 0.6rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.4rem; }
+    .action-row { flex-direction: column; }
+    .btn-action { flex: unset; width: 100%; }
+  }
+
+  /* ── Demographic form ── */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+  }
+  @media (max-width: 480px) { .demo-grid { grid-template-columns: 1fr; } }
+  .demo-field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .demo-bmi { justify-content: center; }
+  .demo-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .demo-required { color: #e05c3a; }
+  .demo-input {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 0.55rem 0.75rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    background: var(--bg);
+    transition: border-color 0.18s;
+    width: 100%;
+  }
+  .demo-input:focus { outline: none; border-color: var(--teal); background: var(--white); }
+  .demo-input.filled { border-color: var(--teal-mid); background: var(--white); }
+  .demo-bmi-value {
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--teal-dark);
+    background: var(--teal-light);
+    min-height: 38px;
+    display: flex; align-items: center;
+  }
+  .demo-hint {
+    font-size: 0.82rem;
+    color: #e05c3a;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: #fff5f3;
+    border-radius: 6px;
+    border: 1px solid #f5c4b8;
+  }
+
+  /* ── Sending status ── */
+  .send-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .send-status.sending { background:#f0fafa; color:var(--teal-dark); border:1px solid var(--border); }
+  .send-status.success { background:#edfaf2; color:#1b6b3a; border:1px solid #a8e6c0; }
+  .send-status.error   { background:#fff5f3; color:#b03a20; border:1px solid #f5c4b8; }
+  .send-dot {
+    width:8px; height:8px; border-radius:50%; flex-shrink:0;
+  }
+  .send-dot.sending { background:var(--teal); animation: pulse-dot 1s infinite; }
+  .send-dot.success { background:#2a9d5c; }
+  .send-dot.error   { background:#e05c3a; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── Config banner (shown when URL not set) ── */
+  .config-banner {
+    background: #fffbea;
+    border: 1.5px solid #f5c84a;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    color: #7a5c00;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .config-banner strong { color: #5a4200; }
+
+  /* ── Info summary ── */
+  .info-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .info-chip {
+    background: var(--teal-light);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--teal-dark);
+    font-weight: 500;
+  }
+
+  /* ── Admin panel ── */
+  #admin-panel { display: none; }
+  .admin-header {
+    background: linear-gradient(135deg, #1a2e2e 0%, #0d6e6e 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .admin-header h2 {
+    font-family: 'Noto Serif Thai', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .admin-header p { font-size: 0.82rem; opacity: 0.8; }
+  .admin-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .btn-excel {
+    background: #1e6e38;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 0.55rem 1.1rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 0.4rem;
+    transition: opacity 0.2s;
+  }
+  .btn-excel:hover { opacity: 0.88; }
+  .btn-danger {
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 0.55rem 1.1rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-danger:hover { opacity: 0.88; }
+  .btn-back-admin {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 7px;
+    padding: 0.55rem 1.1rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-back-admin:hover { background: rgba(255,255,255,0.25); }
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    padding: 1rem 1rem 0;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  @media (max-width: 480px) { .admin-stats { grid-template-columns: 1fr 1fr; } }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--teal-dark);
+    line-height: 1.1;
+  }
+  .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .admin-table-wrap {
+    max-width: 680px;
+    margin: 1rem auto 3rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    min-width: 560px;
+  }
+  .admin-table th {
+    background: var(--teal-dark);
+    color: white;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .admin-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #eef3f3;
+    color: var(--text-main);
+    white-space: nowrap;
+  }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:nth-child(even) td { background: var(--teal-pale); }
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .empty-state div { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+  /* Admin entry link in header */
+  .admin-link {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    background: var(--teal-dark);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 0.55rem 1.1rem;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(13,110,110,0.35);
+    z-index: 200;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .admin-link:hover { opacity: 0.9; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">แพทย์แผนไทย · ตรีธาตุ</div>
+  <h1>แบบประเมินตรีธาตุประจำตัว</h1>
+  <p style="font-size:1rem; font-weight:600; opacity:0.95; margin-bottom:0.2rem;">(ปกติลักษณะ)</p>
+  <p>ประเมินสัดส่วนวาตะ ปิตตะ และเสมหะ ตามหลักการแพทย์แผนไทยดั้งเดิม</p>
+</header>
+
+<!-- Instruction box -->
+<div style="background:#fff; border-left: 4px solid var(--teal); border-radius: 0 8px 8px 0; margin: 1rem 1rem 0; padding: 1rem 1.2rem; box-shadow: var(--shadow); font-size:0.88rem; line-height:1.75; color:var(--text-main);">
+  <div style="font-weight:700; color:var(--teal-dark); margin-bottom:0.4rem; font-size:0.9rem;">📋 คำชี้แจง</div>
+  แบบประเมินนี้มีวัตถุประสงค์เพื่อประเมินลักษณะพื้นฐานโดยทั่วไปของบุคคลตามแนวคิดตรีธาตุ ได้แก่ <strong>วาตะ ปิตตะ</strong> และ <strong>เสมหะ</strong>
+  โปรดอ่านคำถามแต่ละข้อและเลือกคำตอบ <strong>เพียง 1 ตัวเลือก</strong> ที่ตรงกับลักษณะตามธรรมชาติและลักษณะที่เป็นอยู่โดยทั่วไปของท่านมากที่สุด
+  โดยพิจารณาจาก<strong>ลักษณะที่พบเป็นประจำในช่วงหลายปีที่ผ่านมา</strong> ไม่ใช่อาการที่เพิ่งเกิดขึ้นจากการเจ็บป่วย ความเครียด การอดนอน หรือการเปลี่ยนแปลงชั่วคราว
+  กรุณาตอบทุกข้อ หากท่านรู้สึกว่ามีลักษณะมากกว่าหนึ่งแบบ ให้เลือกคำตอบที่ใกล้เคียงกับตัวท่านมากที่สุด
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="progress-text">ตอบแล้ว 0 / 21 ข้อ</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<div class="container" id="form-section">
+
+  <!-- ข้อมูลส่วนตัว -->
+  <div class="section-header">
+    <div class="section-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+    </div>
+    <div class="section-title">ข้อมูลส่วนตัว</div>
+  </div>
+
+  <div class="question-card" id="card-demo">
+    <div class="demo-grid">
+      <div class="demo-field">
+        <label class="demo-label">รหัสผู้ประเมิน <span class="demo-required">*</span></label>
+        <input class="demo-input" type="text" id="d-code" placeholder="เช่น TTM001">
+      </div>
+      <div class="demo-field">
+        <label class="demo-label">อายุ (ปี) <span class="demo-required">*</span></label>
+        <input class="demo-input" type="number" id="d-age" placeholder="เช่น 25" min="1" max="120">
+      </div>
+      <div class="demo-field">
+        <label class="demo-label">เพศ <span class="demo-required">*</span></label>
+        <select class="demo-input" id="d-gender">
+          <option value="">-- เลือก --</option>
+          <option value="ชาย">ชาย</option>
+          <option value="หญิง">หญิง</option>
+          <option value="อื่น ๆ">อื่น ๆ</option>
+        </select>
+      </div>
+      <div class="demo-field">
+        <label class="demo-label">น้ำหนัก (กก.) <span class="demo-required">*</span></label>
+        <input class="demo-input" type="number" id="d-weight" placeholder="เช่น 60" min="1" step="0.1">
+      </div>
+      <div class="demo-field">
+        <label class="demo-label">ส่วนสูง (ซม.) <span class="demo-required">*</span></label>
+        <input class="demo-input" type="number" id="d-height" placeholder="เช่น 165" min="1" step="0.1">
+      </div>
+      <div class="demo-field demo-bmi">
+        <label class="demo-label">BMI (คำนวณอัตโนมัติ)</label>
+        <div class="demo-bmi-value" id="bmi-display">—</div>
+      </div>
+    </div>
+    <div class="demo-hint" id="demo-hint" style="display:none">⚠ กรุณากรอกข้อมูลส่วนตัวให้ครบทุกช่อง</div>
+  </div>
+
+  <!-- ส่วนที่ 1 -->
+  <div class="section-header">
+    <div class="section-icon">
+      <!-- body icon -->
+      <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-1 6h2l1 5-2 1v6h-2v-6l-2-1 1-5z"/></svg>
+    </div>
+    <div class="section-title">ส่วนที่ 1 — ลักษณะทางกาย</div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="question-card" id="card-1">
+    <div class="q-label">
+      <div class="q-num">1</div>
+      <div class="q-text">รูปร่างโดยทั่วไปของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q1" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ค่อนข้างผอมบาง โปร่ง น้ำหนักขึ้นยาก</span></label>
+      <label class="option-label"><input type="radio" name="q1" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">รูปร่างค่อนข้างใหญ่ แน่น หรือมีน้ำหนักขึ้นง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q1" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">รูปร่างปานกลางหรือสมส่วน</span></label>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-card" id="card-2">
+    <div class="q-label">
+      <div class="q-num">2</div>
+      <div class="q-text">ผิวหนังของท่านโดยทั่วไปมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q2" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ค่อนข้างอุ่น นุ่ม และมีแนวโน้มแดงหรือระคายเคืองง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q2" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ค่อนข้างแห้ง หยาบ หรือแตกง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q2" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ค่อนข้างนุ่ม เรียบ ชุ่มชื้น หรือมัน</span></label>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-card" id="card-3">
+    <div class="q-label">
+      <div class="q-num">3</div>
+      <div class="q-text">เส้นผมตามธรรมชาติของท่านมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q3" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ค่อนข้างดก หนา เรียบ หรือมีความมัน</span></label>
+      <label class="option-label"><input type="radio" name="q3" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ค่อนข้างบาง แห้ง หยาบ หรือเปราะง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q3" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ความหนาปานกลาง และมีแนวโน้มหงอกหรือบางเร็วกว่าปกติ</span></label>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-card" id="card-4">
+    <div class="q-label">
+      <div class="q-num">4</div>
+      <div class="q-text">ลักษณะการเคลื่อนไหวร่างกายโดยทั่วไปของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q4" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">เคลื่อนไหวคล่องแคล่ว กระฉับกระเฉง และมีเป้าหมาย</span></label>
+      <label class="option-label"><input type="radio" name="q4" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">เคลื่อนไหวค่อนข้างช้า สุขุม และสม่ำเสมอ</span></label>
+      <label class="option-label"><input type="radio" name="q4" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">เคลื่อนไหวเร็ว เปลี่ยนอิริยาบถบ่อย นั่งนิ่งนานได้ยาก</span></label>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-card" id="card-5">
+    <div class="q-label">
+      <div class="q-num">5</div>
+      <div class="q-text">ท่านมีความไวต่ออุณหภูมิอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q5" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ทนต่อการเปลี่ยนแปลงอุณหภูมิได้ค่อนข้างดี แต่ไม่ชอบอากาศเย็นชื้น</span></label>
+      <label class="option-label"><input type="radio" name="q5" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">รู้สึกหนาวหรือเย็นง่าย และมักต้องการความอบอุ่น</span></label>
+      <label class="option-label"><input type="radio" name="q5" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">รู้สึกร้อนง่าย ไม่ชอบอากาศร้อนหรือแดดจัด</span></label>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="question-card" id="card-6">
+    <div class="q-label">
+      <div class="q-num">6</div>
+      <div class="q-text">ลักษณะการมีเหงื่อของท่านโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q6" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">เหงื่อออกง่ายหรือออกมาก โดยเฉพาะเมื่อร้อน</span></label>
+      <label class="option-label"><input type="radio" name="q6" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">เหงื่อออกปานกลางและค่อนข้างสม่ำเสมอ</span></label>
+      <label class="option-label"><input type="radio" name="q6" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">เหงื่อออกไม่มากหรือไม่สม่ำเสมอ</span></label>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-card" id="card-7">
+    <div class="q-label">
+      <div class="q-num">7</div>
+      <div class="q-text">ลักษณะการพูดของท่านโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q7" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">พูดค่อนข้างช้า สุขุม นุ่มนวล และสม่ำเสมอ</span></label>
+      <label class="option-label"><input type="radio" name="q7" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">พูดเร็ว พูดมาก หรือเปลี่ยนเรื่องค่อนข้างเร็ว</span></label>
+      <label class="option-label"><input type="radio" name="q7" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">พูดชัด ตรงประเด็น หนักแน่น หรือค่อนข้างจริงจัง</span></label>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 2 -->
+  <div class="section-header">
+    <div class="section-icon">
+      <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 1 0 0 18A9 9 0 0 0 13 3zm-1 13v-6H9l4-7v6h3l-4 7z"/></svg>
+    </div>
+    <div class="section-title">ส่วนที่ 2 — ลักษณะทางสรีรวิทยาและพฤติกรรม</div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-card" id="card-8">
+    <div class="q-label">
+      <div class="q-num">8</div>
+      <div class="q-text">ความหิวของท่านโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q8" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">หิวชัดเจน หิวบ่อย และมักทนหิวได้ไม่ดี</span></label>
+      <label class="option-label"><input type="radio" name="q8" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ไม่แน่นอน บางครั้งหิวมาก บางครั้งไม่ค่อยหิว</span></label>
+      <label class="option-label"><input type="radio" name="q8" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ความหิวค่อนข้างสม่ำเสมอ และสามารถเว้นช่วงระหว่างมื้อได้นาน</span></label>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question-card" id="card-9">
+    <div class="q-label">
+      <div class="q-num">9</div>
+      <div class="q-text">ปริมาณอาหารที่รับประทานในแต่ละมื้อโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q9" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">รับประทานค่อนข้างช้า และอิ่มได้นาน</span></label>
+      <label class="option-label"><input type="radio" name="q9" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">รับประทานได้ค่อนข้างมากและมีความอยากอาหารดี</span></label>
+      <label class="option-label"><input type="radio" name="q9" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ปริมาณไม่แน่นอน บางมื้อน้อย บางมื้อมาก</span></label>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question-card" id="card-10">
+    <div class="q-label">
+      <div class="q-num">10</div>
+      <div class="q-text">การย่อยอาหารของท่านโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q10" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ไม่สม่ำเสมอ มีท้องอืดหรือลมในท้องง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q10" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ย่อยค่อนข้างช้า และรู้สึกอิ่มหรือหนักท้องได้นาน</span></label>
+      <label class="option-label"><input type="radio" name="q10" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ย่อยค่อนข้างเร็ว และมักกลับมาหิวเร็ว</span></label>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="question-card" id="card-11">
+    <div class="q-label">
+      <div class="q-num">11</div>
+      <div class="q-text">ลักษณะการขับถ่ายอุจจาระโดยทั่วไปของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q11" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ค่อนข้างสม่ำเสมอ แต่อาจมีแนวโน้มถ่ายง่ายหรือเหลว</span></label>
+      <label class="option-label"><input type="radio" name="q11" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ไม่สม่ำเสมอ มีแนวโน้มท้องผูก อุจจาระแห้งหรือแข็ง</span></label>
+      <label class="option-label"><input type="radio" name="q11" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ค่อนข้างสม่ำเสมอ อุจจาระเป็นก้อน นุ่ม แต่อาจรู้สึกหนักหรือเหนียว</span></label>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="question-card" id="card-12">
+    <div class="q-label">
+      <div class="q-num">12</div>
+      <div class="q-text">ลักษณะการนอนหลับของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q12" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">หลับสนิท หลับได้นาน และตื่นค่อนข้างยาก</span></label>
+      <label class="option-label"><input type="radio" name="q12" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ระยะเวลานอนปานกลาง หลับและตื่นค่อนข้างเป็นเวลา</span></label>
+      <label class="option-label"><input type="radio" name="q12" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">หลับค่อนข้างตื้น ตื่นง่าย หรือหลับไม่ต่อเนื่อง</span></label>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="question-card" id="card-13">
+    <div class="q-label">
+      <div class="q-num">13</div>
+      <div class="q-text">น้ำหนักตัวของท่านมีแนวโน้มเปลี่ยนแปลงอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q13" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">น้ำหนักลดง่ายหรือเพิ่มน้ำหนักได้ยาก</span></label>
+      <label class="option-label"><input type="radio" name="q13" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">น้ำหนักขึ้นง่ายและต้องใช้ความพยายามมากในการลดน้ำหนัก</span></label>
+      <label class="option-label"><input type="radio" name="q13" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">น้ำหนักเพิ่มหรือลดได้ตามการรับประทานอาหารและกิจกรรม</span></label>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="question-card" id="card-14">
+    <div class="q-label">
+      <div class="q-num">14</div>
+      <div class="q-text">ความทนทานในการทำกิจกรรมต่อเนื่องของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q14" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">มีพลังและทำงานหนักได้ดี แต่เมื่อใช้พลังมากอาจหมดแรงชัดเจน</span></label>
+      <label class="option-label"><input type="radio" name="q14" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">พลังงานมาเป็นช่วง ๆ ทำเร็วแต่เหนื่อยง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q14" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">เริ่มต้นไม่เร็ว แต่สามารถทำกิจกรรมต่อเนื่องได้นานและมีความอดทน</span></label>
+    </div>
+  </div>
+
+  <!-- ส่วนที่ 3 -->
+  <div class="section-header">
+    <div class="section-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>
+    </div>
+    <div class="section-title">ส่วนที่ 3 — ลักษณะทางจิตใจและอารมณ์</div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="question-card" id="card-15">
+    <div class="q-label">
+      <div class="q-num">15</div>
+      <div class="q-text">เมื่อต้องเรียนรู้สิ่งใหม่ ท่านมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q15" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">อาจใช้เวลาเรียนรู้ แต่เมื่อจำได้แล้วมักจำได้นาน</span></label>
+      <label class="option-label"><input type="radio" name="q15" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">เข้าใจหรือจับประเด็นได้เร็ว แต่บางครั้งลืมง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q15" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">เข้าใจได้ดี ชอบวิเคราะห์และหาเหตุผล</span></label>
+    </div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="question-card" id="card-16">
+    <div class="q-label">
+      <div class="q-num">16</div>
+      <div class="q-text">สมาธิและความสนใจของท่านโดยทั่วไปเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q16" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">มีสมาธิจดจ่อกับเป้าหมายได้ดี</span></label>
+      <label class="option-label"><input type="radio" name="q16" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">มีสมาธิค่อนข้างคงที่ ทำสิ่งเดิมได้นาน ไม่ชอบถูกรบกวน</span></label>
+      <label class="option-label"><input type="radio" name="q16" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ความสนใจเปลี่ยนง่าย ถูกรบกวนจากสิ่งรอบตัวได้ง่าย</span></label>
+    </div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="question-card" id="card-17">
+    <div class="q-label">
+      <div class="q-num">17</div>
+      <div class="q-text">เมื่อต้องเริ่มต้นทำงานหรือกิจกรรมใหม่ ท่านมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q17" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ตื่นเต้นกับสิ่งใหม่ เริ่มเร็ว แต่ความสนใจอาจเปลี่ยนไป</span></label>
+      <label class="option-label"><input type="radio" name="q17" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">มีเป้าหมายชัดเจน ชอบริเริ่มและผลักดันงานให้สำเร็จ</span></label>
+      <label class="option-label"><input type="radio" name="q17" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ต้องใช้เวลาเริ่มต้น แต่เมื่อเริ่มแล้วมักทำต่อเนื่องจนเสร็จ</span></label>
+    </div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="question-card" id="card-18">
+    <div class="q-label">
+      <div class="q-num">18</div>
+      <div class="q-text">ลักษณะอารมณ์โดยทั่วไปของท่านเป็นอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q18" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ใจเย็น สงบ อดทน และอารมณ์ค่อนข้างคงที่</span></label>
+      <label class="option-label"><input type="radio" name="q18" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">อารมณ์ค่อนข้างเข้มข้น ใจร้อน หงุดหงิดหรือโกรธง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q18" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">อ่อนไหว กังวลง่าย หรืออารมณ์เปลี่ยนแปลงง่าย</span></label>
+    </div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="question-card" id="card-19">
+    <div class="q-label">
+      <div class="q-num">19</div>
+      <div class="q-text">เมื่อต้องตัดสินใจ ท่านมักมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q19" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ตัดสินใจค่อนข้างเร็ว ชัดเจน และมั่นใจ</span></label>
+      <label class="option-label"><input type="radio" name="q19" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ลังเลหรือเปลี่ยนใจได้ง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q19" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ใช้เวลาพิจารณา แต่เมื่อตัดสินใจแล้วมักไม่เปลี่ยน</span></label>
+    </div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="question-card" id="card-20">
+    <div class="q-label">
+      <div class="q-num">20</div>
+      <div class="q-text">เมื่อต้องอยู่ในสถานการณ์แข่งขันหรือมีแรงกดดัน ท่านมักมีลักษณะอย่างไร</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q20" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">รู้สึกกังวลหรือเครียดง่าย</span></label>
+      <label class="option-label"><input type="radio" name="q20" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ค่อนข้างสงบ ไม่เร่งรีบ และรักษาจังหวะของตนเองได้</span></label>
+      <label class="option-label"><input type="radio" name="q20" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">รู้สึกท้าทาย ชอบแข่งขัน และต้องการทำให้ดีที่สุด</span></label>
+    </div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="question-card" id="card-21">
+    <div class="q-label">
+      <div class="q-num">21</div>
+      <div class="q-text">ลักษณะความฝันแบบใดที่ท่านพบซ้ำหรือจดจำได้บ่อยกว่าแบบอื่น</div>
+    </div>
+    <div class="options">
+      <label class="option-label"><input type="radio" name="q21" value="ก"><div class="option-indicator"></div><span class="option-key">ก</span><span class="option-text">ฝันเกี่ยวกับแสงสว่าง ดวงอาทิตย์ ไฟ หรือความร้อน</span></label>
+      <label class="option-label"><input type="radio" name="q21" value="ข"><div class="option-indicator"></div><span class="option-key">ข</span><span class="option-text">ฝันเกี่ยวกับน้ำ แม่น้ำ ทะเล สิ่งสีขาว หรือบรรยากาศสงบ</span></label>
+      <label class="option-label"><input type="radio" name="q21" value="ค"><div class="option-indicator"></div><span class="option-key">ค</span><span class="option-text">ฝันเกี่ยวกับการเคลื่อนไหว การเดินทาง การวิ่ง การบิน หรือลอยในอากาศ</span></label>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button class="btn-submit" id="btn-submit" disabled onclick="showResults()">ดูผลการประเมิน</button>
+    <div class="submit-hint" id="submit-hint">กรุณาตอบให้ครบทุกข้อก่อน</div>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="container" id="results">
+  <div class="result-card">
+    <div class="result-header">
+      <h2>ผลการประเมินตรีธาตุประจำตัว</h2>
+      <p>ปกติลักษณะ · ตามหลักการแพทย์แผนไทย (วาตะ–ปิตตะ–เสมหะ)</p>
+    </div>
+    <div class="result-body">
+      <div id="info-summary-block"></div>
+      <div id="dominant-block"></div>
+
+      <div style="margin-top:1.25rem;">
+        <div class="dosha-row">
+          <span class="dosha-name" style="color:#5a4ecc">🌀 วาตะ</span>
+          <div class="dosha-bar-bg"><div class="dosha-bar-fill vata" id="bar-vata"></div></div>
+          <span class="dosha-score" id="score-vata">0%</span>
+        </div>
+        <div class="dosha-row">
+          <span class="dosha-name" style="color:#b03a20">🔥 ปิตตะ</span>
+          <div class="dosha-bar-bg"><div class="dosha-bar-fill pitta" id="bar-pitta"></div></div>
+          <span class="dosha-score" id="score-pitta">0%</span>
+        </div>
+        <div class="dosha-row">
+          <span class="dosha-name" style="color:#1b6b3a">💧 เสมหะ</span>
+          <div class="dosha-bar-bg"><div class="dosha-bar-fill kapha" id="bar-kapha"></div></div>
+          <span class="dosha-score" id="score-kapha">0%</span>
+        </div>
+      </div>
+
+      <div class="dosha-desc" id="dosha-desc"></div>
+
+      <!-- Send status -->
+      <div id="send-status" style="display:none"></div>
+
+      <div class="action-row">
+        <button class="btn-action btn-secondary" onclick="resetForm()">ทำแบบประเมินใหม่</button>
+        <button class="btn-action btn-primary" onclick="copyResults()">คัดลอกผลลัพธ์</button>
+        <button class="btn-action btn-primary" onclick="printResults()">พิมพ์ผล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail table -->
+  <div class="result-card">
+    <div class="result-header" style="padding:1rem 1.5rem;">
+      <h2 style="font-size:1rem;">รายละเอียดคำตอบทุกข้อ</h2>
+    </div>
+    <div class="result-body" style="padding:1rem;">
+      <div id="answer-detail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div>
+      <h2>📊 ข้อมูลผู้ตอบแบบประเมิน</h2>
+      <p id="admin-count-label">โหลดข้อมูล...</p>
+    </div>
+    <div class="admin-actions">
+      <button class="btn-excel" onclick="exportExcel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.5 19l-2-3.5 2-3.5H7l-1.25 2.5L4.5 12H3l2 3.5-2 3.5h1.5l1.25-2.5L7 19h1.5zm4.25 0H11l-1.5-2.625L8 19H6.5l2.25-3.5L6.5 12H8l1.5 2.625L11 12h1.5l-2.25 3.5L12.75 19zm5.5 0h-4v-7h1.5v5.5H18v1.5z"/></svg>
+        Export Excel
+      </button>
+      <button class="btn-danger" onclick="confirmClearAll()">ล้างข้อมูลทั้งหมด</button>
+      <button class="btn-back-admin" onclick="closeAdmin()">← กลับ</button>
+    </div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-label">ผู้ตอบทั้งหมด</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#5a4ecc" id="stat-vata">—</div>
+      <div class="stat-label">วาตะเด่น</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#b03a20" id="stat-pitta">—</div>
+      <div class="stat-label">ปิตตะเด่น</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:#1b6b3a" id="stat-kapha">—</div>
+      <div class="stat-label">เสมหะเด่น</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-avg-bmi">—</div>
+      <div class="stat-label">BMI เฉลี่ย</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-avg-age">—</div>
+      <div class="stat-label">อายุเฉลี่ย (ปี)</div>
+    </div>
+  </div>
+
+  <div class="admin-table-wrap">
+    <div id="admin-table-container"></div>
+  </div>
+</div>
+
+<button class="admin-link" onclick="openAdmin()">🗂 ดูข้อมูลทั้งหมด</button>
+
+<div class="toast" id="toast">คัดลอกผลลัพธ์แล้ว</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  ⚙️  ตั้งค่า: วาง Web App URL จาก Google Apps Script ที่นี่
+//  (หลัง Deploy แล้ว copy URL มาแทนที่ข้อความด้านล่าง)
+// ══════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7hrekpKv0FNAttmIi685_S6KV33x9N-OS1RQ76R3b7DxgFGeVyjiqEXppd_OwuqfA/exec';
+// ══════════════════════════════════════════════════
+
+const scoreMap = {
+  1:  { ก:'vata', ข:'kapha', ค:'pitta' },
+  2:  { ก:'pitta', ข:'vata', ค:'kapha' },
+  3:  { ก:'kapha', ข:'vata', ค:'pitta' },
+  4:  { ก:'pitta', ข:'vata', ค:'kapha' },
+  5:  { ก:'vata', ข:'pitta', ค:'kapha' },
+  6:  { ก:'pitta', ข:'kapha', ค:'vata' },
+  7:  { ก:'kapha', ข:'vata', ค:'pitta' },
+  8:  { ก:'pitta', ข:'vata', ค:'kapha' },
+  9:  { ก:'kapha', ข:'vata', ค:'pitta' },
+  10: { ก:'vata', ข:'kapha', ค:'pitta' },
+  11: { ก:'pitta', ข:'vata', ค:'kapha' },
+  12: { ก:'kapha', ข:'pitta', ค:'vata' },
+  13: { ก:'vata', ข:'kapha', ค:'pitta' },
+  14: { ก:'pitta', ข:'vata', ค:'kapha' },
+  15: { ก:'kapha', ข:'vata', ค:'pitta' },
+  16: { ก:'pitta', ข:'kapha', ค:'vata' },
+  17: { ก:'vata', ข:'pitta', ค:'kapha' },
+  18: { ก:'kapha', ข:'pitta', ค:'vata' },
+  19: { ก:'pitta', ข:'vata', ค:'kapha' },
+  20: { ก:'vata', ข:'kapha', ค:'pitta' },
+  21: { ก:'pitta', ข:'kapha', ค:'vata' }
+};
+
+const qTexts = {
+  1:'รูปร่างโดยทั่วไป',2:'ผิวหนัง',3:'เส้นผม',4:'การเคลื่อนไหวร่างกาย',
+  5:'ความไวต่ออุณหภูมิ',6:'การมีเหงื่อ',7:'การพูด',8:'ความหิว',
+  9:'ปริมาณอาหารที่รับประทาน',10:'การย่อยอาหาร',11:'การขับถ่าย',12:'การนอนหลับ',
+  13:'น้ำหนักตัว',14:'ความทนทาน',15:'การเรียนรู้',16:'สมาธิ',
+  17:'การเริ่มงานใหม่',18:'อารมณ์',19:'การตัดสินใจ',20:'ความกดดัน',21:'ความฝัน'
+};
+
+const doshaDesc = {
+  vata: 'ธาตุวาตะ (ลม) เด่น — ท่านมักมีความคิดสร้างสรรค์สูง กระตือรือร้น และปรับตัวเร็ว ชอบการเปลี่ยนแปลงและสิ่งใหม่ ๆ ควรดูแลสุขภาพด้วยการรับประทานอาหารที่ให้ความอบอุ่น นอนหลับพักผ่อนให้เพียงพอ และหลีกเลี่ยงความเครียดสะสม',
+  pitta: 'ธาตุปิตตะ (ไฟ) เด่น — ท่านมีความมุ่งมั่นสูง คิดวิเคราะห์เก่ง และมีความเป็นผู้นำ ควรดูแลสุขภาพด้วยการหลีกเลี่ยงอาหารรสเผ็ดร้อน ดูแลอารมณ์ให้สมดุล และออกกำลังกายระบายพลังงานอย่างสม่ำเสมอ',
+  kapha: 'ธาตุเสมหะ (น้ำ-ดิน) เด่น — ท่านมีความมั่นคง อดทน และเชื่อถือได้สูง มีความรักและเมตตา ควรดูแลสุขภาพด้วยการออกกำลังกายสม่ำเสมอ หลีกเลี่ยงอาหารมัน หวาน หนัก และกระตุ้นตนเองให้เคลื่อนไหวอยู่เสมอ',
+  balanced: 'ธาตุสมดุล — ท่านมีสัดส่วนธาตุทั้งสามค่อนข้างสมดุล ซึ่งถือเป็นลักษณะที่ดี ควรรักษาวิถีชีวิตและการรับประทานอาหารที่หลากหลายและสมดุลต่อไป'
+};
+
+const answers = {};
+
+// ── BMI auto-calc ──
+['d-weight','d-height'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcBMI);
+});
+function calcBMI() {
+  const w = parseFloat(document.getElementById('d-weight').value);
+  const h = parseFloat(document.getElementById('d-height').value) / 100;
+  const el = document.getElementById('bmi-display');
+  if (w > 0 && h > 0) {
+    const bmi = (w / (h * h)).toFixed(2);
+    let cat = '';
+    if (bmi < 18.5) cat = ' (ต่ำกว่าเกณฑ์)';
+    else if (bmi < 23) cat = ' (ปกติ)';
+    else if (bmi < 25) cat = ' (น้ำหนักเกิน)';
+    else cat = ' (อ้วน)';
+    el.textContent = bmi + cat;
+  } else {
+    el.textContent = '—';
+  }
+}
+
+// Mark filled demo inputs
+document.querySelectorAll('.demo-input').forEach(inp => {
+  inp.addEventListener('input', () => {
+    inp.classList.toggle('filled', inp.value.trim() !== '');
+    updateProgress();
+  });
+  inp.addEventListener('change', () => {
+    inp.classList.toggle('filled', inp.value.trim() !== '');
+    updateProgress();
+  });
+});
+
+// ── Event listeners ──
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const q = parseInt(this.name.replace('q',''));
+    answers[q] = this.value;
+
+    // mark card
+    const card = document.getElementById('card-'+q);
+    card.classList.add('answered');
+    card.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+    this.closest('.option-label').classList.add('selected');
+
+    updateProgress();
+  });
+});
+
+function demoComplete() {
+  const code   = document.getElementById('d-code').value.trim();
+  const age    = document.getElementById('d-age').value.trim();
+  const gender = document.getElementById('d-gender').value.trim();
+  const weight = document.getElementById('d-weight').value.trim();
+  const height = document.getElementById('d-height').value.trim();
+  return code && age && gender && weight && height;
+}
+
+function updateProgress() {
+  const total = 21;
+  const done = Object.keys(answers).length;
+  const pct = Math.round(done/total*100);
+  document.getElementById('progress-text').textContent = `ตอบแล้ว ${done} / ${total} ข้อ`;
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-fill').style.width = pct+'%';
+
+  const btn = document.getElementById('btn-submit');
+  const hint = document.getElementById('submit-hint');
+  const ready = done === total && demoComplete();
+  if (ready) {
+    btn.disabled = false;
+    hint.textContent = 'ข้อมูลครบถ้วน — กดเพื่อดูผลการประเมิน';
+    hint.style.color = 'var(--teal)';
+  } else if (done === total && !demoComplete()) {
+    btn.disabled = true;
+    hint.textContent = 'กรุณากรอกข้อมูลส่วนตัวให้ครบก่อน';
+    hint.style.color = '#e05c3a';
+  } else {
+    btn.disabled = true;
+    hint.textContent = `กรุณาตอบอีก ${total-done} ข้อ`;
+    hint.style.color = '';
+  }
+}
+
+function showResults() {
+  // Validate demo
+  if (!demoComplete()) {
+    document.getElementById('demo-hint').style.display = 'block';
+    document.getElementById('card-demo').scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  document.getElementById('demo-hint').style.display = 'none';
+
+  // Calculate scores
+  const scores = { vata:0, pitta:0, kapha:0 };
+  for(let q=1; q<=21; q++){
+    const ans = answers[q];
+    if(ans && scoreMap[q][ans]) scores[scoreMap[q][ans]]++;
+  }
+
+  const vataPct  = parseFloat((scores.vata  / 21 * 100).toFixed(2));
+  const pittaPct = parseFloat((scores.pitta / 21 * 100).toFixed(2));
+  const kaphaPct = parseFloat((scores.kapha / 21 * 100).toFixed(2));
+
+  // Bars (use raw count proportion for bar width)
+  document.getElementById('bar-vata').style.width  = (scores.vata/21*100)+'%';
+  document.getElementById('bar-pitta').style.width = (scores.pitta/21*100)+'%';
+  document.getElementById('bar-kapha').style.width = (scores.kapha/21*100)+'%';
+  document.getElementById('score-vata').textContent  = vataPct.toFixed(2)+'%';
+  document.getElementById('score-pitta').textContent = pittaPct.toFixed(2)+'%';
+  document.getElementById('score-kapha').textContent = kaphaPct.toFixed(2)+'%';
+
+  // Dominant
+  const maxScore = Math.max(scores.vata, scores.pitta, scores.kapha);
+  const isBalanced = scores.vata === scores.pitta && scores.pitta === scores.kapha;
+  let dominant, domClass, domLabel, domEmoji;
+  if(isBalanced){ dominant='balanced'; domClass=''; domLabel='สมดุลสามธาตุ'; domEmoji='⚖️'; }
+  else if(scores.vata===maxScore){ dominant='vata'; domClass='vata'; domLabel='วาตะ (ลม)'; domEmoji='🌀'; }
+  else if(scores.pitta===maxScore){ dominant='pitta'; domClass='pitta'; domLabel='ปิตตะ (ไฟ)'; domEmoji='🔥'; }
+  else { dominant='kapha'; domClass='kapha'; domLabel='เสมหะ (น้ำ-ดิน)'; domEmoji='💧'; }
+
+  // Info summary chips
+  const code   = document.getElementById('d-code').value.trim();
+  const age    = document.getElementById('d-age').value.trim();
+  const gender = document.getElementById('d-gender').value.trim();
+  const weight = document.getElementById('d-weight').value.trim();
+  const height = document.getElementById('d-height').value.trim();
+  const w = parseFloat(weight), h = parseFloat(height)/100;
+  const bmi = (w>0 && h>0) ? (w/(h*h)).toFixed(2) : '—';
+
+  document.getElementById('info-summary-block').innerHTML = `
+    <div class="info-summary">
+      <span class="info-chip">รหัส: ${code}</span>
+      <span class="info-chip">อายุ: ${age} ปี</span>
+      <span class="info-chip">เพศ: ${gender}</span>
+      <span class="info-chip">น้ำหนัก: ${weight} กก.</span>
+      <span class="info-chip">ส่วนสูง: ${height} ซม.</span>
+      <span class="info-chip">BMI: ${bmi}</span>
+    </div>`;
+
+  document.getElementById('dominant-block').innerHTML =
+    `<div style="text-align:center">
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.4rem;">ธาตุเจ้าเรือนของท่าน</div>
+      <div class="dominant-badge ${domClass}">${domEmoji} ${domLabel}</div>
+    </div>`;
+
+  document.getElementById('dosha-desc').textContent = doshaDesc[dominant];
+
+  // Answer detail
+  const sections = [
+    { title:'ส่วนที่ 1 — ลักษณะทางกาย', qs:[1,2,3,4,5,6,7] },
+    { title:'ส่วนที่ 2 — ลักษณะทางสรีรวิทยาและพฤติกรรม', qs:[8,9,10,11,12,13,14] },
+    { title:'ส่วนที่ 3 — ลักษณะทางจิตใจและอารมณ์', qs:[15,16,17,18,19,20,21] }
+  ];
+
+  let html = '';
+  sections.forEach(sec => {
+    html += `<div class="section-detail-title">${sec.title}</div>`;
+    html += '<table class="answers-table"><thead><tr><th>ข้อ</th><th>หัวข้อ</th><th>คำตอบ</th><th>ธาตุ</th></tr></thead><tbody>';
+    sec.qs.forEach(q => {
+      const ans = answers[q] || '-';
+      const dosha = (scoreMap[q][ans]) || '';
+      const labels = {vata:'วาตะ',pitta:'ปิตตะ',kapha:'เสมหะ'};
+      const tagClass = dosha ? `tag-${dosha}` : 'tag-none';
+      const tagText = dosha ? labels[dosha] : '-';
+      html += `<tr>
+        <td style="color:var(--text-muted);font-weight:600">${q}</td>
+        <td>${qTexts[q]}</td>
+        <td style="font-weight:600">${ans}</td>
+        <td><span class="${tagClass}">${tagText}</span></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+  });
+  document.getElementById('answer-detail').innerHTML = html;
+
+  // Switch views
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ── Send to Google Sheets ──
+  const responseData = {
+    code, age, gender, weight, height, bmi,
+    vataPct, pittaPct, kaphaPct,
+    vataRaw: scores.vata, pittaRaw: scores.pitta, kaphaRaw: scores.kapha,
+    dominant: domLabel,
+    answers: {...answers},
+    timestamp: new Date().toLocaleString('th-TH')
+  };
+  saveResponse(responseData);
+  sendToSheets(responseData);
+}
+
+function resetForm() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+  document.querySelectorAll('.question-card').forEach(c => c.classList.remove('answered'));
+  document.querySelectorAll('.demo-input').forEach(i => { i.value=''; i.classList.remove('filled'); });
+  document.getElementById('bmi-display').textContent = '—';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyResults() {
+  const scores = { vata:0, pitta:0, kapha:0 };
+  for(let q=1;q<=21;q++){const a=answers[q];if(a&&scoreMap[q][a])scores[scoreMap[q][a]]++;}
+  const vataPct  = (scores.vata/21*100).toFixed(2);
+  const pittaPct = (scores.pitta/21*100).toFixed(2);
+  const kaphaPct = (scores.kapha/21*100).toFixed(2);
+  const max = Math.max(scores.vata, scores.pitta, scores.kapha);
+  const dom = scores.vata===max?'วาตะ':scores.pitta===max?'ปิตตะ':'เสมหะ';
+  const code   = document.getElementById('d-code').value.trim();
+  const age    = document.getElementById('d-age').value.trim();
+  const gender = document.getElementById('d-gender').value.trim();
+  const weight = document.getElementById('d-weight').value.trim();
+  const height = document.getElementById('d-height').value.trim();
+  const w = parseFloat(weight), h = parseFloat(height)/100;
+  const bmi = (w>0&&h>0) ? (w/(h*h)).toFixed(2) : '—';
+  const text = `ผลประเมินตรีธาตุประจำตัว (ปกติลักษณะ)
+รหัส: ${code} | อายุ: ${age} ปี | เพศ: ${gender}
+น้ำหนัก: ${weight} กก. | ส่วนสูง: ${height} ซม. | BMI: ${bmi}
+วาตะ: ${vataPct}% (${scores.vata}/21 ข้อ)
+ปิตตะ: ${pittaPct}% (${scores.pitta}/21 ข้อ)
+เสมหะ: ${kaphaPct}% (${scores.kapha}/21 ข้อ)
+ธาตุเด่น: ${dom}`;
+  navigator.clipboard.writeText(text).then(()=>showToast('คัดลอกผลลัพธ์แล้ว'));
+}
+
+function printResults() { window.print(); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ── Persistent Storage ──
+const STORAGE_KEY = 'tridosha-responses';
+
+async function saveResponse(data) {
+  try {
+    let all = [];
+    try {
+      const existing = await window.storage.get(STORAGE_KEY);
+      if (existing) all = JSON.parse(existing.value);
+    } catch(e) { all = []; }
+    all.push(data);
+    await window.storage.set(STORAGE_KEY, JSON.stringify(all));
+  } catch(e) {
+    console.warn('Storage unavailable:', e);
+  }
+}
+
+// ── ส่งข้อมูลไป Google Sheets ────────────────────────────────
+function sendToSheets(data) {
+  const statusEl = document.getElementById('send-status');
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    statusEl.className = 'send-status error';
+    statusEl.style.display = 'flex';
+    statusEl.innerHTML = `<span class="send-dot error"></span>
+      ยังไม่ได้ตั้งค่า URL — กรุณาเปิดไฟล์และแทนที่ <code>YOUR_APPS_SCRIPT_URL_HERE</code> ด้วย Web App URL`;
+    return;
+  }
+
+  statusEl.className = 'send-status sending';
+  statusEl.style.display = 'flex';
+  statusEl.innerHTML = '<span class="send-dot sending"></span> กำลังบันทึกข้อมูลไปยัง Google Sheets...';
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    statusEl.className = 'send-status success';
+    statusEl.innerHTML = '<span class="send-dot success"></span> บันทึกข้อมูลลง Google Sheets เรียบร้อยแล้ว ✓';
+  })
+  .catch(err => {
+    statusEl.className = 'send-status error';
+    statusEl.innerHTML = `<span class="send-dot error"></span> เกิดข้อผิดพลาด: ${err.message} — ข้อมูลถูกบันทึกในเครื่องแทน`;
+  });
+}
+
+async function loadResponses() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY);
+    if (!result) return [];
+    return JSON.parse(result.value);
+  } catch(e) { return []; }
+}
+
+// ── Admin Panel ──
+async function openAdmin() {
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  await renderAdminTable();
+}
+
+function closeAdmin() {
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function renderAdminTable() {
+  const data = await loadResponses();
+  const total = data.length;
+
+  // Stats
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('admin-count-label').textContent =
+    total ? `ข้อมูลทั้งหมด ${total} ราย` : 'ยังไม่มีข้อมูล';
+
+  if (total === 0) {
+    document.getElementById('admin-table-container').innerHTML =
+      '<div class="empty-state"><div>📭</div>ยังไม่มีผู้ตอบแบบประเมิน</div>';
+    ['stat-vata','stat-pitta','stat-kapha','stat-avg-bmi','stat-avg-age'].forEach(id =>
+      document.getElementById(id).textContent = '0');
+    return;
+  }
+
+  // Compute stats
+  const domCount = { วาตะ: 0, ปิตตะ: 0, เสมหะ: 0 };
+  let totalBmi = 0, totalAge = 0, bmiCount = 0;
+  data.forEach(r => {
+    const dom = r.dominant.replace(' (ลม)','').replace(' (ไฟ)','').replace(' (น้ำ-ดิน)','');
+    if (domCount[dom] !== undefined) domCount[dom]++;
+    const bmi = parseFloat(r.bmi);
+    if (!isNaN(bmi)) { totalBmi += bmi; bmiCount++; }
+    totalAge += parseFloat(r.age) || 0;
+  });
+  document.getElementById('stat-vata').textContent = domCount['วาตะ'];
+  document.getElementById('stat-pitta').textContent = domCount['ปิตตะ'];
+  document.getElementById('stat-kapha').textContent = domCount['เสมหะ'];
+  document.getElementById('stat-avg-bmi').textContent =
+    bmiCount ? (totalBmi/bmiCount).toFixed(1) : '—';
+  document.getElementById('stat-avg-age').textContent =
+    total ? (totalAge/total).toFixed(1) : '—';
+
+  // Table
+  let html = `<table class="admin-table">
+    <thead><tr>
+      <th>#</th><th>รหัส</th><th>อายุ</th><th>เพศ</th>
+      <th>น้ำหนัก</th><th>ส่วนสูง</th><th>BMI</th>
+      <th>วาตะ%</th><th>ปิตตะ%</th><th>เสมหะ%</th>
+      <th>ธาตุเด่น</th><th>วันที่บันทึก</th>
+    </tr></thead><tbody>`;
+  data.forEach((r, i) => {
+    html += `<tr>
+      <td>${i+1}</td>
+      <td><strong>${r.code}</strong></td>
+      <td>${r.age}</td><td>${r.gender}</td>
+      <td>${r.weight}</td><td>${r.height}</td><td>${r.bmi}</td>
+      <td>${parseFloat(r.vataPct).toFixed(2)}%</td>
+      <td>${parseFloat(r.pittaPct).toFixed(2)}%</td>
+      <td>${parseFloat(r.kaphaPct).toFixed(2)}%</td>
+      <td>${r.dominant}</td>
+      <td>${r.timestamp}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('admin-table-container').innerHTML = html;
+}
+
+// ── Export Excel ──
+async function exportExcel() {
+  const data = await loadResponses();
+  if (!data.length) { showToast('ไม่มีข้อมูลสำหรับ export'); return; }
+
+  // Sheet 1: Summary
+  const summaryRows = [
+    ['รหัส','อายุ (ปี)','เพศ','น้ำหนัก (กก.)','ส่วนสูง (ซม.)','BMI',
+     'วาตะ (ข้อ)','ปิตตะ (ข้อ)','เสมหะ (ข้อ)',
+     'วาตะ (%)','ปิตตะ (%)','เสมหะ (%)','ธาตุเด่น','วันที่บันทึก']
+  ];
+  data.forEach(r => {
+    summaryRows.push([
+      r.code, parseFloat(r.age), r.gender,
+      parseFloat(r.weight), parseFloat(r.height), parseFloat(r.bmi),
+      r.vataRaw, r.pittaRaw, r.kaphaRaw,
+      parseFloat(parseFloat(r.vataPct).toFixed(2)),
+      parseFloat(parseFloat(r.pittaPct).toFixed(2)),
+      parseFloat(parseFloat(r.kaphaPct).toFixed(2)),
+      r.dominant, r.timestamp
+    ]);
+  });
+
+  // Sheet 2: Raw Answers (แต่ละข้อ)
+  const qHeaders = ['รหัส','อายุ','เพศ'];
+  for (let q = 1; q <= 21; q++) qHeaders.push(`ข้อ ${q}`);
+  qHeaders.push('วาตะ (ข้อ)','ปิตตะ (ข้อ)','เสมหะ (ข้อ)','ธาตุเด่น');
+
+  const rawRows = [qHeaders];
+  data.forEach(r => {
+    const row = [r.code, r.age, r.gender];
+    for (let q = 1; q <= 21; q++) row.push(r.answers[q] || '-');
+    row.push(r.vataRaw, r.pittaRaw, r.kaphaRaw, r.dominant);
+    rawRows.push(row);
+  });
+
+  const wb = XLSX.utils.book_new();
+
+  const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
+  // Column widths for sheet 1
+  ws1['!cols'] = [
+    {wch:12},{wch:8},{wch:8},{wch:12},{wch:12},{wch:8},
+    {wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},
+    {wch:16},{wch:20}
+  ];
+  XLSX.utils.book_append_sheet(wb, ws1, 'สรุปผล');
+
+  const ws2 = XLSX.utils.aoa_to_sheet(rawRows);
+  ws2['!cols'] = [{wch:12},{wch:6},{wch:8},
+    ...Array(21).fill({wch:6}),
+    {wch:10},{wch:10},{wch:10},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'คำตอบรายข้อ');
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `ตรีธาตุ_ปกติลักษณะ_${dateStr}.xlsx`);
+  showToast(`Export ${data.length} รายการเรียบร้อย`);
+}
+
+async function confirmClearAll() {
+  if (!confirm(`ต้องการลบข้อมูลทั้งหมด ${(await loadResponses()).length} รายการ?\nการดำเนินการนี้ไม่สามารถเรียกคืนได้`)) return;
+  try {
+    await window.storage.delete(STORAGE_KEY);
+    showToast('ลบข้อมูลทั้งหมดแล้ว');
+    await renderAdminTable();
+  } catch(e) { showToast('เกิดข้อผิดพลาด'); }
+}
+</script>
+</body>
+</html>
